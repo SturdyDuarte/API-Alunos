@@ -1,27 +1,27 @@
-const express = require('express')
+const express = require('express');
 const path = require('path');
 const app = express();
-const port = 3000;
+
+// porta configurável via env var
+const port = process.env.PORT || 3000;
 
 // Inicializa o banco de dados
 require('./database/init');
 
-// permite que o servidor entenda requisições com corpo em JSON
-app.use(express.json())
-
-// Serve arquivos estáticos da pasta 'public'
+// Middlewares
+app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public')));
 
-// Importa as rotas dos alunos
+// Rotas
 const alunoRoutes = require('./routes/alunoRoutes');
-app.use("/alunos", alunoRoutes);
+app.use('/alunos', alunoRoutes);
 
-// Rota raiz
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
-})
+});
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+// Escuta em 0.0.0.0 para expor corretamente dentro do container
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Example app listening on port ${port}`);
+});
 

@@ -1,0 +1,113 @@
+version: '3.7'
+
+services:
+  # ----------------------------------------------------
+  # 1. Banco de Dados MySQL (PARA O ZABBIX)
+  # ----------------------------------------------------
+  mysql-server:
+    image: mysql:8.0
+    container_name: zabbix-mysql
+    restart: always
+    environment:
+      # Credenciais do banco de dados Zabbix
+      MYSQL_ROOT_PASSWORD: zabbix_root_password
+      MYSQL_DATABASE: zabbix_db
+      MYSQL_USER: zabbix
+      MYSQL_PASSWORD: zabbix_db_password
+    volumes:
+      # Volume nomeado para persistir dados do MySQL
+      - mysql_data:/var/lib/mysql
+    networks:
+      - monitoring-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ----------------------------------------------------
+  # 2. Zabbix Server
+  # ----------------------------------------------------
+  zabbix-server:
+    image: zabbix/zabbix-server-mysql:latest
+    container_name: zabbix-server
+    restart: always
+    environment:
+      DB_SERVER_HOST: mysql-server 
+      MYSQL_DATABASE: zabbix_db
+      MYSQL_USER: zabbix
+      MYSQL_PASSWORD: zabbix_db_password
+      TZ: America/Sao_Paulo
+    ports:
+      - "10051:10051"
+    depends_on:
+      mysql-server:
+        condition: service_healthy
+    networks:
+      - monitoring-net
+
+  # ----------------------------------------------------
+  # 3. Zabbix Web Interface (Frontend)
+  # ----------------------------------------------------
+  zabbix-web:
+    image: zabbix/zabbix-web-nginx-mysql:latest
+    container_name: zabbix-web
+    restart: always
+    environment:
+      ZBX_SERVER_HOST: zabbix-server
+      MYSQL_DATABASE: zabbix_db
+      MYSQL_USER: zabbix
+      MYSQL_PASSWORD: zabbix_db_password
+      TZ: America/Sao_Paulo
+    ports:
+      - "8080:8080" # Acesse a interface Zabbix aqui
+    depends_on:
+      - zabbix-server
+    networks:
+      - monitoring-net
+
+  # ----------------------------------------------------
+  # 4. Grafana
+  # ----------------------------------------------------
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: always
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: grafana_admin_password
+    volumes:
+      # Volume nomeado para persistir configurações e dashboards do Grafana
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000" # Acesse o Grafana aqui
+    networks:
+      - monitoring-net
+    depends_on:
+      - zabbix-server
+
+  # ----------------------------------------------------
+  # 5. Sua Aplicação (COM SQLite)
+  # ----------------------------------------------------
+  minha-aplicacao:
+    build: . # Assume que você tem um Dockerfile na raiz do projeto
+    container_name: sua-app-sqlite
+    restart: always
+    ports:
+      - "8000:3000" # Mude para a porta real da sua aplicação
+    volumes:
+      # **Bind Mount para persistência do SQLite:**
+      # Mapeia o diretório local './src/database' para o diretório
+      # onde sua aplicação salva o arquivo .db dentro do container (/app/data).
+      - ./src/database:/app/data
+    networks:
+      - monitoring-net
+      
+# Definição dos Volumes para persistência de dados do MySQL e Grafana
+volumes:
+  mysql_data:
+  grafana_data:
+
+# Definição da Rede para comunicação entre todos os containers
+networks:
+  monitoring-net:
+    driver: bridge
