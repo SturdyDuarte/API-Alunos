@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Alunos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Gerenciamento de Alunos</h1>
+            <p>Sistema de cadastro e gerenciamento de alunos</p>
+        </header>
+
+        <main>
+            <!-- Formulário para adicionar aluno -->
+            <section class="form-section">
+                <h2>Adicionar Novo Aluno</h2>
+                <form id="alunoForm">
+                    <div class="form-group">
+                        <label for="nome">Nome:</label>
+                        <input type="text" id="nome" name="nome" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="curso">Curso:</label>
+                        <input type="text" id="curso" name="curso" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Adicionar Aluno</button>
+                </form>
+            </section>
+
+            <!-- Lista de alunos -->
+            <section class="list-section">
+                <h2>Lista de Alunos</h2>
+                <div id="mensagem" class="mensagem"></div>
+                <table id="alunosTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Curso</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="alunosList">
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #999;">Carregando alunos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
