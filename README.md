@@ -63,17 +63,13 @@ Docker Compose
 1. Construir e Rodar os Containers
 Execute o seguinte comando no diretório raiz do projeto:
 
-Bash
-
-docker-compose up --build -d
+`docker-compose up --build -d`
 O flag -d executa os containers em segundo plano.
 
 2. Parar os Containers
 Para parar e remover os containers:
 
-Bash
-
-docker-compose down
+`docker-compose down`
 👥 Contribuição
 Este projeto foi desenvolvido por:
 
@@ -82,3 +78,4 @@ Marcos Duarte
 Thiago Pininga
 
 Leonardo Luiz
+
